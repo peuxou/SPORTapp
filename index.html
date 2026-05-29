@@ -26,14 +26,14 @@
             margin: 0;
             padding: 20px;
             padding-top: 20px;
-            padding-bottom: 90px; /* Espace pour la barre d'onglets */
+            padding-bottom: 90px;
             user-select: none;
         }
         h1, h2, h3 { margin-top: 0; }
         .screen { display: none; }
         .screen.active { display: block; }
         
-        /* Barre d'onglets de navigation (iOS style) */
+        /* Barre d'onglets de navigation */
         .tab-bar {
             position: fixed;
             bottom: 0;
@@ -141,7 +141,6 @@
 
     <!-- ================= ONGLET SÉANCES ================= -->
     <div id="tab-content-workouts" class="tab-page">
-        <!-- ÉCRAN ACCUEIL (DANS L'ONGLET SÉANCES) -->
         <div id="screen-home" class="screen active">
             <h1 style="font-size: 26px; margin-bottom: 20px; margin-top: 20px;">Mon Suivi Sport</h1>
             
@@ -156,7 +155,6 @@
             <div id="history-container"></div>
         </div>
 
-        <!-- ÉCRAN CHOIX PROGRAMME -->
         <div id="screen-type" class="screen">
             <h2 style="margin-top: 20px;">Quelle séance aujourd'hui ?</h2>
             <button class="btn" style="background-color: var(--push-color); color: white;" onclick="startWorkout('PUSH')">🔴 PUSH (Pecs / Épaules / Tri)</button>
@@ -165,7 +163,6 @@
             <button class="btn btn-secondary" onclick="closeWorkoutSelector()">Retour</button>
         </div>
 
-        <!-- ÉCRAN SÉANCE EN COURS -->
         <div id="screen-workout" class="screen">
             <h2 id="workout-title" style="margin-top: 20px;">Séance</h2>
             <div id="exercises-container"></div>
@@ -179,12 +176,11 @@
         <h1 style="font-size: 26px; margin-bottom: 20px; margin-top: 20px;">Ma Progression</h1>
         <label style="color: var(--text-secondary); font-size: 14px; display:block; margin-bottom: 8px;">Choisir un exercice :</label>
         <select id="exercise-select" onchange="updateChart()">
-            <!-- Rempli dynamiquement en JavaScript -->
+            <!-- Rempli dynamiquement -->
         </select>
 
-        <div class="chart-container">
+        <div class="chart-container" id="chart-box">
             <h3 id="chart-title" style="font-size: 16px; margin-bottom: 15px; color: var(--accent-color);">Évolution des charges</h3>
-            <!-- Graphique en Canvas HTML5 natif (sans bibliothèque externe lourde) -->
             <canvas id="progressionChart" width="320" height="220" style="width: 100%; max-width: 350px;"></canvas>
         </div>
         
@@ -228,7 +224,6 @@
                 document.getElementById('tab-btn-workouts').classList.add('active');
                 showScreen('screen-home');
             } else if (tabId === 'stats') {
-                document.getElementById('tab-content-stats').style.style.display = 'block'; // Sécurité doublon
                 document.getElementById('tab-content-stats').style.display = 'block';
                 document.getElementById('tab-btn-stats').classList.add('active');
                 populateExerciseSelect();
@@ -237,7 +232,7 @@
         }
 
         function openWorkoutSelector() {
-            document.getElementById('main-tab-bar').style.display = 'none'; // Cache les onglets pendant l'entrainement
+            document.getElementById('main-tab-bar').style.display = 'none';
             showScreen('screen-type');
         }
         function closeWorkoutSelector() {
@@ -404,11 +399,10 @@
             }
         }
 
-        // --- MOTEUR DES STATISTIQUES & GRAPHIQUE ---
+        // --- PROGRESSION & GRAPHIQUE CORRIGÉ ---
         function populateExerciseSelect() {
             const select = document.getElementById('exercise-select');
-            const savedValue = select.value;
-            select.innerHTML = '';
+            if (select.children.length > 0) return; // Évite de vider/recréer si déjà fait
 
             Object.keys(programs).forEach(progName => {
                 let group = document.createElement('optgroup');
@@ -420,21 +414,19 @@
                 });
                 select.appendChild(group);
             });
-            if(savedValue) select.value = savedValue;
         }
 
         function updateChart() {
-            const selectedExo = document.getElementById('exercise-select').value;
+            const select = document.getElementById('exercise-select');
+            const selectedExo = select.value;
+            if(!selectedExo) return;
+
             const history = JSON.parse(localStorage.getItem('workout_history')) || [];
-            
-            // Extraire les points (date + poids max pour cet exo)
-            // On inverse l'historique pour l'avoir dans le sens chronologique (du plus vieux au plus récent)
             let chartData = [];
             
             [...history].reverse().forEach(workout => {
                 let foundExo = workout.exercises.find(e => e.name === selectedExo);
                 if (foundExo) {
-                    // Trouver le poids max soulevé pendant cette séance
                     let maxWeight = 0;
                     foundExo.series.forEach(s => { if(s.w > maxWeight) maxWeight = s.w; });
                     if(maxWeight > 0) {
@@ -444,20 +436,22 @@
             });
 
             const canvas = document.getElementById('progressionChart');
+            const chartBox = document.getElementById('chart-box');
+            const emptyMsg = document.getElementById('stats-empty-msg');
             const ctx = canvas.getContext('2d');
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+            // Pour voir une courbe, il faut au moins 2 séances enregistrées contenant CET exercice particulier
             if (chartData.length < 2) {
-                document.getElementById('stats-empty-msg').style.display = 'block';
-                canvas.style.display = 'none';
+                emptyMsg.style.display = 'block';
+                chartBox.style.display = 'none';
                 return;
             }
 
-            document.getElementById('stats-empty-msg').style.display = 'none';
-            canvas.style.display = 'block';
+            emptyMsg.style.display = 'none';
+            chartBox.style.display = 'flex';
 
-            // Paramètres du tracé de courbe natif
-            const padding = 35;
+            const padding = 40;
             const chartWidth = canvas.width - padding * 2;
             const chartHeight = canvas.height - padding * 2;
 
@@ -465,8 +459,9 @@
             let minW = Math.min(...weights) - 5; if(minW < 0) minW = 0;
             let maxW = Math.max(...weights) + 5;
             let wRange = maxW - minW;
+            if(wRange === 0) wRange = 10; // Sécurité si charges identiques
 
-            // Dessiner les axes et repères horizontaux
+            // Lignes de repères
             ctx.strokeStyle = '#2c2c2e';
             ctx.lineWidth = 1;
             ctx.fillStyle = '#aaaaaa';
@@ -480,7 +475,7 @@
                 ctx.fillText(`${currW}kg`, padding - 8, y + 3);
             }
 
-            // Tracer la courbe
+            // Tracé
             ctx.strokeStyle = '#34c759';
             ctx.lineWidth = 3;
             ctx.lineJoin = 'round';
@@ -491,29 +486,26 @@
             chartData.forEach((d, idx) => {
                 let x = padding + (chartWidth / (chartData.length - 1)) * idx;
                 let y = canvas.height - padding - ((d.weight - minW) / wRange) * chartHeight;
-                points.push({x, y, date: d.date, weight: d.weight});
+                points.push({x, y, date: d.date});
                 if(idx === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
             });
             ctx.stroke();
 
-            // Dessiner les points et dates
-            ctx.fillStyle = '#ffffff';
-            ctx.textAlign = 'center';
+            // Points
             points.forEach((p, idx) => {
                 ctx.beginPath();
                 ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
                 ctx.fillStyle = '#34c759'; ctx.fill();
                 ctx.lineWidth = 2; ctx.strokeStyle = '#ffffff'; ctx.stroke();
                 
-                // Afficher les dates sous l'axe X (seulement premier, milieu et dernier pour éviter les chevauchements)
                 if(idx === 0 || idx === points.length - 1 || (points.length > 2 && idx === Math.floor(points.length / 2))) {
                     ctx.fillStyle = '#aaaaaa';
-                    ctx.fillText(p.date, p.x, canvas.height - 10);
+                    ctx.textAlign = 'center';
+                    ctx.fillText(p.date, p.x, canvas.height - 12);
                 }
             });
         }
 
-        // Init de départ
         loadHistory();
         generateCalendar();
     </script>
