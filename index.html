@@ -15,6 +15,9 @@
             --accent-color: #34c759;
             --text-color: #ffffff;
             --text-secondary: #aaaaaa;
+            --push-color: #ff3b30;
+            --pull-color: #34c759;
+            --legs-color: #007aff;
         }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -53,6 +56,46 @@
             color: white;
         }
         
+        /* Calendrier */
+        .calendar-box {
+            background-color: var(--card-bg);
+            border-radius: 14px;
+            padding: 15px;
+            margin-bottom: 25px;
+        }
+        .calendar-header {
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-transform: capitalize;
+            color: var(--text-secondary);
+        }
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+            text-align: center;
+            font-size: 12px;
+        }
+        .calendar-day-name {
+            color: var(--text-secondary);
+            font-weight: bold;
+            padding-bottom: 5px;
+        }
+        .calendar-day {
+            padding: 8px 0;
+            border-radius: 50%;
+            position: relative;
+            font-weight: 500;
+        }
+        .day-workout {
+            font-weight: bold;
+            color: #000 !important;
+        }
+        .day-PUSH { background-color: var(--push-color); }
+        .day-PULL { background-color: var(--pull-color); }
+        .day-LEGS { background-color: var(--legs-color); }
+
         /* Cartes d'exercices */
         .exo-card {
             background-color: var(--card-bg);
@@ -92,32 +135,69 @@
         /* Historique */
         .hist-item {
             background-color: var(--card-bg);
-            border-radius: 10px;
-            padding: 12px;
-            margin-bottom: 10px;
+            border-radius: 14px;
+            padding: 15px;
+            margin-bottom: 15px;
             font-size: 14px;
+            position: relative;
         }
-        .hist-date { font-weight: bold; color: var(--text-secondary); margin-bottom: 5px;}
+        .hist-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            border-bottom: 1px solid #2c2c2e;
+            padding-bottom: 6px;
+        }
+        .hist-date { font-weight: bold; color: var(--text-color); }
+        .badge {
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: bold;
+            color: #000;
+        }
+        .badge-PUSH { background-color: var(--push-color); }
+        .badge-PULL { background-color: var(--pull-color); }
+        .badge-LEGS { background-color: var(--legs-color); }
+        .btn-delete {
+            background: none;
+            border: none;
+            color: #ff3b30;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 0 5px;
+        }
     </style>
 </head>
 <body>
 
+    <!-- ÉCRAN ACCUEIL -->
     <div id="screen-home" class="screen active">
-        <h1 style="font-size: 28px; margin-bottom: 30px;">Mon Suivi Sport</h1>
+        <h1 style="font-size: 26px; margin-bottom: 20px;">Mon Suivi Sport</h1>
+        
         <button class="btn" onclick="showScreen('screen-type')">🏋️‍♂️ Nouvelle Séance</button>
         
-        <h2 style="margin-top: 40px; font-size: 20px; color: var(--text-secondary);">Historique récent</h2>
+        <!-- CALENDRIER -->
+        <div class="calendar-box">
+            <div class="calendar-header" id="calendar-month-year"></div>
+            <div class="calendar-grid" id="calendar-grid-container"></div>
+        </div>
+        
+        <h2 style="font-size: 18px; color: var(--text-secondary); margin-bottom: 10px;">Historique des séances</h2>
         <div id="history-container"></div>
     </div>
 
+    <!-- ÉCRAN CHOIX PROGRAMME -->
     <div id="screen-type" class="screen">
         <h2>Quelle séance aujourd'hui ?</h2>
-        <button class="btn" onclick="startWorkout('PUSH')">🔴 PUSH (Pecs / Épaules / Tri)</button>
-        <button class="btn" onclick="startWorkout('PULL')">🟢 PULL (Dos / Biceps)</button>
-        <button class="btn" onclick="startWorkout('LEGS')">🔵 LEGS (Cuisses / Cardio)</button>
+        <button class="btn" style="background-color: var(--push-color); color: white;" onclick="startWorkout('PUSH')">🔴 PUSH (Pecs / Épaules / Tri)</button>
+        <button class="btn" style="background-color: var(--pull-color); color: black;" onclick="startWorkout('PULL')">🟢 PULL (Dos / Biceps)</button>
+        <button class="btn" style="background-color: var(--legs-color); color: white;" onclick="startWorkout('LEGS')">🔵 LEGS (Cuisses / Cardio)</button>
         <button class="btn btn-secondary" onclick="showScreen('screen-home')">Retour</button>
     </div>
 
+    <!-- ÉCRAN SÉANCE EN COURS -->
     <div id="screen-workout" class="screen">
         <h2 id="workout-title">Séance</h2>
         <div id="exercises-container"></div>
@@ -126,12 +206,10 @@
     </div>
 
     <script>
-        // Enregistrement du Service Worker pour le mode PWA (hors-ligne)
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('./sw.js');
         }
 
-        // Base de données des exercices
         const programs = {
             PUSH: ["Machine Push (Pecs)", "Machine inclinée (Haut Pecs)", "Machine Épaules", "Élévations latérales", "Poulie Triceps (Exo 1)", "Poulie Triceps (Exo 2)"],
             PULL: ["Tractions", "Tirage vertical", "Tirage horizontal", "Oiseau ou Rowing sur banc", "Poulie Biceps (Barre droite)", "Poulie Biceps (Corde)"],
@@ -143,7 +221,10 @@
         function showScreen(screenId) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(screenId).classList.add('active');
-            if(screenId === 'screen-home') loadHistory();
+            if(screenId === 'screen-home') {
+                loadHistory();
+                generateCalendar();
+            }
             window.scrollTo(0,0);
         }
 
@@ -158,7 +239,6 @@
                 card.className = 'exo-card';
                 card.innerHTML = `<div class="exo-title">${exo}</div>`;
                 
-                // On génère par défaut 4 séries par exercice
                 for (let s = 1; s <= 4; s++) {
                     card.innerHTML += `
                         <div class="series-row">
@@ -176,9 +256,12 @@
         }
 
         function saveWorkout() {
+            const now = new Date();
             let workoutData = {
+                id: now.getTime(), // ID unique pour suppression
                 type: currentType,
-                date: new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute:'2-digit' }),
+                dateString: now.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute:'2-digit' }),
+                calendarKey: `${now.getFullYear()}-${now.getMonth()}-${now.getDate()}`, // Clé pour le calendrier
                 exercises: []
             };
 
@@ -202,15 +285,25 @@
             }
 
             let history = JSON.parse(localStorage.getItem('workout_history')) || [];
-            history.unshift(workoutData); // Ajoute au début
+            history.unshift(workoutData);
             localStorage.setItem('workout_history', JSON.stringify(history));
 
             showScreen('screen-home');
         }
 
         function cancelWorkout() {
-            if (confirm("Annuler la séance en cours ? Les données seront perdues.")) {
+            if (confirm("Annuler la séance en cours ?")) {
                 showScreen('screen-home');
+            }
+        }
+
+        function deleteWorkout(id) {
+            if (confirm("Supprimer définitivement cette séance de l'historique ?")) {
+                let history = JSON.parse(localStorage.getItem('workout_history')) || [];
+                history = history.filter(workout => workout.id !== id);
+                localStorage.setItem('workout_history', JSON.stringify(history));
+                loadHistory();
+                generateCalendar();
             }
         }
 
@@ -220,27 +313,93 @@
             let history = JSON.parse(localStorage.getItem('workout_history')) || [];
 
             if (history.length === 0) {
-                container.innerHTML = '<p style="color: var(--text-secondary); font-style: italic;">Aucune séance enregistrée pour le moment.</p>';
+                container.innerHTML = '<p style="color: var(--text-secondary); font-style: italic;">Aucune séance enregistrée.</p>';
                 return;
             }
 
-            // Affiche les 5 dernières séances
-            history.slice(0, 5).forEach(workout => {
+            history.forEach(workout => {
                 let item = document.createElement('div');
                 item.className = 'hist-item';
-                let html = `<div class="hist-date">${workout.date} - Séance ${workout.type}</div>`;
+                
+                let html = `
+                    <div class="hist-header">
+                        <span class="badge badge-${workout.type}">${workout.type}</span>
+                        <div class="hist-date">${workout.dateString}</div>
+                        <button class="btn-delete" onclick="deleteWorkout(${workout.id})">🗑️</button>
+                    </div>
+                `;
                 
                 workout.exercises.forEach(exo => {
                     let seriesText = exo.series.map(s => `${s.w}kg x ${s.r}`).join(' | ');
-                    html += `<div style="margin-top:4px;">• <strong>${exo.name}</strong> : <span style="color:#34c759">${seriesText}</span></div>`;
+                    html += `<div style="margin-top:6px;">• <strong>${exo.name}</strong> : <span style="color:var(--accent-color)">${seriesText}</span></div>`;
                 });
                 item.innerHTML = html;
                 container.appendChild(item);
             });
         }
 
-        // Charger l'historique au premier démarrage
+        function generateCalendar() {
+            const container = document.getElementById('calendar-grid-container');
+            const monthYearLabel = document.getElementById('calendar-month-year');
+            container.innerHTML = '';
+
+            let history = JSON.parse(localStorage.getItem('workout_history')) || [];
+            // Map pour retrouver rapidement le type de séance par jour
+            let workoutMap = {};
+            history.forEach(w => {
+                if(w.calendarKey) workoutMap[w.calendarKey] = w.type;
+            });
+
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = now.getMonth();
+
+            monthYearLabel.innerText = now.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            // Premier jour du mois (0 = Dimanche, 1 = Lundi, etc.)
+            let firstDayIndex = new Date(year, month, 1).getDay();
+            // Ajustement pour commencer par Lundi (Lundi=0, ..., Dimanche=6)
+            firstDayIndex = firstDayIndex === 0 ? 6 : firstDayIndex - 1;
+
+            const dayNames = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
+            dayNames.forEach(name => {
+                let dName = document.createElement('div');
+                dName.className = 'calendar-day-name';
+                dName.innerText = name;
+                container.appendChild(dName);
+            });
+
+            // Cases vides pour le début du mois
+            for (let i = 0; i < firstDayIndex; i++) {
+                let emptyCell = document.createElement('div');
+                container.appendChild(emptyCell);
+            }
+
+            // Jours du mois
+            for (let day = 1; day <= daysInMonth; day++) {
+                let dayCell = document.createElement('div');
+                dayCell.className = 'calendar-day';
+                dayCell.innerText = day;
+
+                let key = `${year}-${month}-${day}`;
+                if (workoutMap[key]) {
+                    let type = workoutMap[key];
+                    dayCell.classList.add('day-workout', `day-${type}`);
+                }
+                
+                // Mettre en valeur le jour d'aujourd'hui s'il n'y a pas de séance
+                if(day === now.getDate() && !workoutMap[key]) {
+                    dayCell.style.border = '1px solid var(--accent-color)';
+                }
+
+                container.appendChild(dayCell);
+            }
+        }
+
+        // Initialisation globale
         loadHistory();
+        generateCalendar();
     </script>
 </body>
 </html>
