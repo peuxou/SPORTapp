@@ -10,37 +10,41 @@
     <meta name="apple-mobile-web-app-title" content="Sport">
     <style>
         :root {
-            --bg-color: #121212;
-            --card-bg: #1e1e1e;
-            --accent-color: #34c759;
+            --bg-color: #000000;
+            --card-bg: #1c1c1e;
+            --input-bg: #2c2c2e;
+            --accent-color: #ff4500; /* Orange Énergie Sport */
             --text-color: #ffffff;
-            --text-secondary: #aaaaaa;
+            --text-secondary: #8e8e93;
             --push-color: #ff3b30;
-            --pull-color: #34c759;
+            --pull-color: #ff9500;
             --legs-color: #007aff;
         }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", Roboto, Helvetica, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color);
             margin: 0;
             padding: 20px;
-            padding-top: 20px;
-            padding-bottom: 90px;
+            padding-top: 30px;
+            padding-bottom: 95px;
             user-select: none;
+            -webkit-font-smoothing: antialiased;
         }
-        h1, h2, h3 { margin-top: 0; }
+        h1, h2, h3 { font-weight: 700; letter-spacing: -0.5px; margin-top: 0; }
         .screen { display: none; }
         .screen.active { display: block; }
         
-        /* Barre d'onglets de navigation */
+        /* Barre d'onglets premium */
         .tab-bar {
             position: fixed;
             bottom: 0;
             left: 0;
             right: 0;
             height: 65px;
-            background-color: #1c1c1e;
+            background-color: rgba(28, 28, 30, 0.85);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
             border-top: 1px solid #2c2c2e;
             display: flex;
             justify-content: space-around;
@@ -53,69 +57,92 @@
             flex-direction: column;
             align-items: center;
             color: var(--text-secondary);
-            font-size: 11px;
-            font-weight: 500;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
             cursor: pointer;
             background: none;
             border: none;
             width: 50%;
+            transition: color 0.2s ease;
         }
         .tab-item.active { color: var(--accent-color); }
-        .tab-icon { font-size: 22px; margin-bottom: 3px; }
+        .tab-icon { font-size: 20px; margin-bottom: 4px; }
 
-        /* Boutons */
+        /* Boutons Style Apple Fitness */
         .btn {
             background-color: var(--accent-color);
-            color: #000;
+            color: #ffffff;
             border: none;
-            padding: 15px 20px;
-            border-radius: 12px;
-            font-size: 18px;
-            font-weight: bold;
+            padding: 16px 20px;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 700;
             width: 100%;
             box-sizing: border-box;
             margin-bottom: 15px;
             cursor: pointer;
             text-align: center;
+            box-shadow: 0 4px 12px rgba(255, 69, 0, 0.2);
+            transition: transform 0.1s ease;
         }
-        .btn-secondary { background-color: #333; color: var(--text-color); }
-        .btn-danger { background-color: #ff3b30; color: white; }
+        .btn:active { transform: scale(0.98); }
+        .btn-secondary { background-color: #2c2c2e; color: var(--text-color); box-shadow: none; }
+        .btn-danger { background-color: #ff3b30; color: white; box-shadow: none; }
         
-        /* Calendrier Interactif */
-        .calendar-box { background-color: var(--card-bg); border-radius: 14px; padding: 15px; margin-bottom: 20px; }
+        /* Calendrier Style Fitness Tracker */
+        .calendar-box { background-color: var(--card-bg); border-radius: 16px; padding: 16px; margin-bottom: 25px; border: 1px solid #2c2c2e; }
         .calendar-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .calendar-btn { background: #2c2c2e; border: none; color: white; padding: 6px 12px; border-radius: 8px; font-size: 16px; font-weight: bold; }
-        .calendar-header { font-weight: bold; text-transform: capitalize; color: white; font-size: 16px; }
+        .calendar-btn { background: #2c2c2e; border: none; color: white; padding: 8px 14px; border-radius: 10px; font-size: 14px; font-weight: bold; }
+        .calendar-header { font-weight: 700; text-transform: capitalize; color: white; font-size: 17px; }
         .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; text-align: center; font-size: 12px; }
-        .calendar-day-name { color: var(--text-secondary); font-weight: bold; padding-bottom: 5px; }
-        .calendar-day { padding: 8px 0; border-radius: 50%; position: relative; font-weight: 500; cursor: pointer; }
-        .day-workout { font-weight: bold; color: #000 !important; }
+        .calendar-day-name { color: var(--text-secondary); font-weight: 600; padding-bottom: 5px; }
+        .calendar-day { padding: 8px 0; border-radius: 50%; position: relative; font-weight: 600; color: #ffffff; }
+        .day-workout { font-weight: 700; color: #ffffff !important; }
         .day-PUSH { background-color: var(--push-color); }
         .day-PULL { background-color: var(--pull-color); }
         .day-LEGS { background-color: var(--legs-color); }
         .day-selected { border: 2px solid #ffffff !important; box-sizing: border-box; }
 
-        /* Cartes d'exercices */
-        .exo-card { background-color: var(--card-bg); border-radius: 14px; padding: 15px; margin-bottom: 20px; }
-        .exo-title { font-size: 18px; font-weight: bold; margin-bottom: 4px; color: var(--accent-color); }
-        .exo-lasttime { font-size: 12px; color: var(--text-secondary); margin-bottom: 12px; font-style: italic; }
-        .series-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
-        .series-label { font-size: 16px; width: 60px; }
-        .inputs-group { display: flex; gap: 10px; }
-        input { background-color: #2c2c2e; border: 1px solid #48484a; color: white; padding: 8px; border-radius: 8px; width: 60px; text-align: center; font-size: 16px; }
+        /* Cartes d'exercices épurées */
+        .exo-card { background-color: var(--card-bg); border-radius: 16px; padding: 18px; margin-bottom: 15px; border: 1px solid #2c2c2e; }
+        .exo-title { font-size: 18px; font-weight: 700; margin-bottom: 4px; color: #ffffff; letter-spacing: -0.3px; }
+        .exo-lasttime { font-size: 12px; color: var(--text-secondary); margin-bottom: 15px; background: rgba(255,255,255,0.04); padding: 6px 10px; border-radius: 8px; }
+        .series-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+        .series-label { font-size: 14px; color: var(--text-secondary); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        .inputs-group { display: flex; gap: 12px; }
         
-        /* Historique */
-        .hist-item { background-color: var(--card-bg); border-radius: 14px; padding: 15px; margin-bottom: 15px; font-size: 14px; }
-        .hist-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; border-bottom: 1px solid #2c2c2e; padding-bottom: 6px; }
-        .hist-date { font-weight: bold; color: var(--text-color); }
-        .badge { padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; color: #000; }
+        /* Inputs Typographie Sport */
+        input { 
+            background-color: var(--input-bg); 
+            border: 1px solid #3a3a3c; 
+            color: #ffffff; 
+            padding: 10px; 
+            border-radius: 10px; 
+            width: 65px; 
+            text-align: center; 
+            font-size: 16px; 
+            font-weight: 700; 
+            font-family: -apple-system-font, BlinkMacSystemFont, monospace; /* Style compteur */
+        }
+        input:focus { border-color: var(--accent-color); outline: none; }
+        input::placeholder { color: #48484a; }
+        
+        /* Historique des séances */
+        .hist-item { background-color: var(--card-bg); border-radius: 16px; padding: 16px; margin-bottom: 12px; border: 1px solid #2c2c2e; }
+        .hist-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid #2c2c2e; padding-bottom: 8px; }
+        .hist-date { font-weight: 600; color: #ffffff; font-size: 15px; }
+        .badge { padding: 5px 10px; border-radius: 8px; font-size: 11px; font-weight: 700; color: #ffffff; text-transform: uppercase; letter-spacing: 0.5px; }
         .badge-PUSH { background-color: var(--push-color); }
         .badge-PULL { background-color: var(--pull-color); }
         .badge-LEGS { background-color: var(--legs-color); }
-        .btn-delete { background: none; border: none; color: #ff3b30; font-size: 18px; cursor: pointer; }
+        .btn-delete { background: none; border: none; color: #ff3b30; font-size: 16px; cursor: pointer; opacity: 0.6; }
+        .btn-delete:active { opacity: 1; }
 
-        select { width: 100%; background-color: var(--card-bg); color: white; border: 1px solid #48484a; padding: 12px; font-size: 16px; border-radius: 12px; margin-bottom: 20px; }
-        .chart-container { background-color: var(--card-bg); border-radius: 14px; padding: 15px; margin-top: 10px; display: flex; flex-direction: column; align-items: center; }
+        /* Menu déroulant & Conteneur Graphique */
+        select { width: 100%; background-color: var(--card-bg); color: white; border: 1px solid #2c2c2e; padding: 14px; font-size: 16px; font-weight: 600; border-radius: 14px; margin-bottom: 25px; -webkit-appearance: none; }
+        .chart-container { background-color: var(--card-bg); border-radius: 16px; padding: 16px; margin-top: 10px; border: 1px solid #2c2c2e; display: flex; flex-direction: column; align-items: center; }
     </style>
 </head>
 <body>
@@ -123,11 +150,10 @@
     <!-- ================= ONGLET SÉANCES ================= -->
     <div id="tab-content-workouts" class="tab-page">
         <div id="screen-home" class="screen active">
-            <h1 style="font-size: 26px; margin-bottom: 20px; margin-top: 20px;">Mon Suivi Sport</h1>
+            <h1 style="font-size: 28px; margin-bottom: 20px; margin-top: 10px;">Entraînement</h1>
             
-            <button class="btn" onclick="openWorkoutSelector()">🏋️‍♂️ Nouvelle Séance</button>
+            <button class="btn" onclick="openWorkoutSelector()">🏋️‍♂️ NOUVELLE SÉANCE</button>
             
-            <!-- CALENDRIER INTERACTIF -->
             <div class="calendar-box">
                 <div class="calendar-nav">
                     <button class="calendar-btn" onclick="changeMonth(-1)">◀</button>
@@ -137,36 +163,35 @@
                 <div class="calendar-grid" id="calendar-grid-container"></div>
             </div>
             
-            <h2 id="history-section-title" style="font-size: 18px; color: var(--text-secondary); margin-bottom: 10px;">Historique des séances</h2>
+            <h2 id="history-section-title" style="font-size: 18px; color: var(--text-secondary); margin-bottom: 12px; text-transform: uppercase; font-size: 13px; letter-spacing: 0.5px;">Historique récent</h2>
             <div id="history-container"></div>
         </div>
 
         <div id="screen-type" class="screen">
-            <h2 style="margin-top: 20px;">Quelle séance aujourd'hui ?</h2>
-            <button class="btn" style="background-color: var(--push-color); color: white;" onclick="startWorkout('PUSH')">🔴 PUSH (Pecs / Épaules / Tri)</button>
-            <button class="btn" style="background-color: var(--pull-color); color: black;" onclick="startWorkout('PULL')">🟢 PULL (Dos / Biceps)</button>
-            <button class="btn" style="background-color: var(--legs-color); color: white;" onclick="startWorkout('LEGS')">🔵 LEGS (Cuisses / Cardio)</button>
-            <button class="btn btn-secondary" onclick="closeWorkoutSelector()">Retour</button>
+            <h2 style="margin-top: 10px; font-size: 24px;">Focus du jour</h2>
+            <button class="btn" style="background-color: var(--push-color);" onclick="startWorkout('PUSH')">🔴 PUSH (Pecs / Épaules / Tri)</button>
+            <button class="btn" style="background-color: var(--pull-color);" onclick="startWorkout('PULL')">🟠 PULL (Dos / Biceps)</button>
+            <button class="btn" style="background-color: var(--legs-color);" onclick="startWorkout('LEGS')">🔵 LEGS (Cuisses / Cardio)</button>
+            <button class="btn btn-secondary" onclick="closeWorkoutSelector()">ANNULER</button>
         </div>
 
         <div id="screen-workout" class="screen">
-            <h2 id="workout-title" style="margin-top: 20px;">Séance</h2>
+            <h2 id="workout-title" style="margin-top: 10px; font-size: 24px;">Séance</h2>
             <div id="exercises-container"></div>
-            <button class="btn" onclick="saveWorkout()">✅ Valider la séance</button>
-            <button class="btn btn-secondary btn-danger" onclick="cancelWorkout()">Annuler la séance</button>
+            <button class="btn" onclick="saveWorkout()">✅ TERMINER LA SÉANCE</button>
+            <button class="btn btn-secondary btn-danger" onclick="cancelWorkout()">ABANDONNER</button>
         </div>
     </div>
 
     <!-- ================= ONGLET PROGRESSION ================= -->
     <div id="tab-content-stats" class="tab-page" style="display: none;">
-        <h1 style="font-size: 26px; margin-bottom: 20px; margin-top: 20px;">Ma Progression</h1>
-        <label style="color: var(--text-secondary); font-size: 14px; display:block; margin-bottom: 8px;">Choisir un exercice :</label>
+        <h1 style="font-size: 28px; margin-bottom: 20px; margin-top: 10px;">Progression</h1>
         <select id="exercise-select" onchange="updateChart()">
             <!-- Rempli dynamiquement -->
         </select>
 
         <div class="chart-container" id="chart-box">
-            <h3 id="chart-title" style="font-size: 16px; margin-bottom: 15px; color: var(--accent-color);">Évolution des charges</h3>
+            <h3 id="chart-title" style="font-size: 14px; margin-bottom: 15px; color: var(--accent-color); text-transform: uppercase; letter-spacing: 0.5px;">Volume Max (kg)</h3>
             <canvas id="progressionChart" width="320" height="220" style="width: 100%; max-width: 350px;"></canvas>
         </div>
         
@@ -183,7 +208,7 @@
         </button>
         <button class="tab-item" id="tab-btn-stats" onclick="switchTab('stats')">
             <span class="tab-icon">📈</span>
-            <span>Progression</span>
+            <span>Suivi</span>
         </button>
     </div>
 
@@ -199,8 +224,8 @@
         };
 
         let currentType = '';
-        let currentCalendarDate = new Date(); // Date de navigation du calendrier
-        let selectedDayKey = null; // Jour cliqué pour filtrer l'historique
+        let currentCalendarDate = new Date();
+        let selectedDayKey = null;
 
         function switchTab(tabId) {
             document.querySelectorAll('.tab-page').forEach(page => page.style.display = 'none');
@@ -209,7 +234,7 @@
             if (tabId === 'workouts') {
                 document.getElementById('tab-content-workouts').style.display = 'block';
                 document.getElementById('tab-btn-workouts').classList.add('active');
-                selectedDayKey = null; // Reset filtre
+                selectedDayKey = null;
                 showScreen('screen-home');
             } else if (tabId === 'stats') {
                 document.getElementById('tab-content-stats').style.display = 'block';
@@ -238,10 +263,8 @@
             window.scrollTo(0,0);
         }
 
-        // --- RECHERCHE DES CHARGES PRÉCÉDENTES ---
         function getLastWorkoutData(type) {
             const history = JSON.parse(localStorage.getItem('workout_history')) || [];
-            // Trouve la première (donc la plus récente) séance de ce type
             return history.find(w => w.type === type);
         }
 
@@ -257,18 +280,17 @@
                 let card = document.createElement('div');
                 card.className = 'exo-card';
                 
-                // Chercher si cet exercice précis existe dans la dernière séance
                 let lastExoInfo = "";
                 if (lastWorkout) {
                     let foundExo = lastWorkout.exercises.find(e => e.name === exo);
                     if (foundExo && foundExo.series.length > 0) {
                         let seriesText = foundExo.series.map(s => `S${s.s}: ${s.w}kg x ${s.r}`).join(' | ');
-                        lastExoInfo = `<div class="exo-lasttime">Dernière fois ➔ ${seriesText}</div>`;
+                        lastExoInfo = `<div class="exo-lasttime">Dernier bloc ➔ ${seriesText}</div>`;
                     } else {
-                        lastExoInfo = `<div class="exo-lasttime">Pas de données récentes</div>`;
+                        lastExoInfo = `<div class="exo-lasttime">Aucun historique récent</div>`;
                     }
                 } else {
-                    lastExoInfo = `<div class="exo-lasttime">Première fois que vous faites cette séance !</div>`;
+                    lastExoInfo = `<div class="exo-lasttime">Première session enregistrée</div>`;
                 }
 
                 card.innerHTML = `
@@ -318,7 +340,7 @@
             });
 
             if (workoutData.exercises.length === 0) {
-                alert("Vous n'avez rien rempli !");
+                alert("Séance vide !");
                 return;
             }
 
@@ -326,20 +348,20 @@
             history.unshift(workoutData);
             localStorage.setItem('workout_history', JSON.stringify(history));
 
-            selectedDayKey = null; // Retire le filtre après enregistrement
+            selectedDayKey = null;
             document.getElementById('main-tab-bar').style.display = 'flex';
             showScreen('screen-home');
         }
 
         function cancelWorkout() {
-            if (confirm("Annuler la séance en cours ?")) {
+            if (confirm("Abandonner la séance ?")) {
                 document.getElementById('main-tab-bar').style.display = 'flex';
                 showScreen('screen-home');
             }
         }
 
         function deleteWorkout(id) {
-            if (confirm("Supprimer définitivement cette séance ?")) {
+            if (confirm("Supprimer cette séance ?")) {
                 let history = JSON.parse(localStorage.getItem('workout_history')) || [];
                 history = history.filter(workout => workout.id !== id);
                 localStorage.setItem('workout_history', JSON.stringify(history));
@@ -354,16 +376,15 @@
             container.innerHTML = '';
             let history = JSON.parse(localStorage.getItem('workout_history')) || [];
 
-            // Appliquer le filtre si un jour du calendrier est sélectionné
             if (selectedDayKey) {
                 history = history.filter(workout => workout.calendarKey === selectedDayKey);
-                sectionTitle.innerHTML = `Séance(s) du jour sélectionné <button onclick="resetHistoryFilter()" style="background:none; border:none; color:var(--accent-color); font-size:13px; text-decoration:underline; margin-left:10px; cursor:pointer;">(Voir tout)</button>`;
+                sectionTitle.innerHTML = `Filtre actif <button onclick="resetHistoryFilter()" style="background:none; border:none; color:var(--accent-color); font-size:12px; text-transform:uppercase; font-weight:700; margin-left:10px; cursor:pointer;">(Effacer)</button>`;
             } else {
                 sectionTitle.innerText = "Historique des séances";
             }
 
             if (history.length === 0) {
-                container.innerHTML = '<p style="color: var(--text-secondary); font-style: italic;">Aucune séance enregistrée pour cette période.</p>';
+                container.innerHTML = '<p style="color: var(--text-secondary); font-style: italic; text-align:center; padding: 20px 0;">Aucune activité.</p>';
                 return;
             }
 
@@ -381,25 +402,20 @@
                 
                 workout.exercises.forEach(exo => {
                     let seriesText = exo.series.map(s => `${s.w}kg x ${s.r}`).join(' | ');
-                    html += `<div style="margin-top:6px;">• <strong>${exo.name}</strong> : <span style="color:var(--accent-color)">${seriesText}</span></div>`;
+                    html += `<div style="margin-top:8px; font-size:14px;"><strong>${exo.name}</strong><br><span style="color:var(--accent-color); font-family:monospace; font-size:13px;">${seriesText}</span></div>`;
                 });
                 item.innerHTML = html;
                 container.appendChild(item);
             });
         }
 
-        // --- GESTION INTERACTIVE DU CALENDRIER ---
         function changeMonth(direction) {
             currentCalendarDate.setMonth(currentCalendarDate.getMonth() + direction);
             generateCalendar();
         }
 
         function selectDay(dayKey) {
-            if (selectedDayKey === dayKey) {
-                selectedDayKey = null; // Unclick pour désélectionner
-            } else {
-                selectedDayKey = dayKey;
-            }
+            selectedDayKey = (selectedDayKey === dayKey) ? null : dayKey;
             generateCalendar();
             loadHistory();
         }
@@ -441,29 +457,15 @@
                 dayCell.className = 'calendar-day'; dayCell.innerText = day;
                 let key = `${year}-${month}-${day}`;
                 
-                // Coloriage si une séance existe
-                if (workoutMap[key]) { 
-                    dayCell.classList.add('day-workout', `day-${workoutMap[key]}`); 
-                }
-                
-                // Bordure verte pour aujourd'hui
-                if(day === today.getDate() && month === today.getMonth() && year === today.getFullYear() && !workoutMap[key]) { 
-                    dayCell.style.border = '1px solid var(--accent-color)'; 
-                }
+                if (workoutMap[key]) { dayCell.classList.add('day-workout', `day-${workoutMap[key]}`); }
+                if(day === today.getDate() && month === today.getMonth() && year === today.getFullYear() && !workoutMap[key]) { dayCell.style.border = '1px solid var(--accent-color)'; }
+                if (selectedDayKey === key) { dayCell.classList.add('day-selected'); }
 
-                // Bordure blanche épaisse si ce jour précis est sélectionné par l'utilisateur
-                if (selectedDayKey === key) {
-                    dayCell.classList.add('day-selected');
-                }
-
-                // Clic pour filtrer les séances
                 dayCell.onclick = () => selectDay(key);
-
                 container.appendChild(dayCell);
             }
         }
 
-        // --- PROGRESSION & GRAPHIQUE ---
         function populateExerciseSelect() {
             const select = document.getElementById('exercise-select');
             if (select.children.length > 0) return;
@@ -493,9 +495,7 @@
                 if (foundExo) {
                     let maxWeight = 0;
                     foundExo.series.forEach(s => { if(s.w > maxWeight) maxWeight = s.w; });
-                    if(maxWeight > 0) {
-                        chartData.push({ date: workout.dateString, weight: maxWeight });
-                    }
+                    if(maxWeight > 0) { chartData.push({ date: workout.dateString, weight: maxWeight }); }
                 }
             });
 
@@ -521,19 +521,19 @@
             let weights = chartData.map(d => d.weight);
             let minW = Math.min(...weights) - 5; if(minW < 0) minW = 0;
             let maxW = Math.max(...weights) + 5;
-            let wRange = maxW - minW;
-            if(wRange === 0) wRange = 10;
+            let wRange = maxW - minW; if(wRange === 0) wRange = 10;
 
-            ctx.strokeStyle = '#2c2c2e'; ctx.lineWidth = 1; ctx.fillStyle = '#aaaaaa'; ctx.font = '10px -apple-system'; ctx.textAlign = 'right';
+            ctx.strokeStyle = '#2c2c2e'; ctx.lineWidth = 1; ctx.fillStyle = '#8e8e93'; ctx.font = 'bold 10px -apple-system'; ctx.textAlign = 'right';
 
             for(let i=0; i<=3; i++) {
                 let currW = Math.round(minW + (wRange / 3) * i);
                 let y = canvas.height - padding - (chartHeight / 3) * i;
                 ctx.beginPath(); ctx.moveTo(padding, y); ctx.lineTo(canvas.width - padding, y); ctx.stroke();
-                ctx.fillText(`${currW}kg`, padding - 8, y + 3);
+                ctx.fillText(`${currW}`, padding - 8, y + 3);
             }
 
-            ctx.strokeStyle = '#34c759'; ctx.lineWidth = 3; ctx.lineJoin = 'round'; ctx.lineCap = 'round'; ctx.beginPath();
+            // Courbe Orange Néon
+            ctx.strokeStyle = '#ff4500'; ctx.lineWidth = 3.5; ctx.lineJoin = 'round'; ctx.lineCap = 'round'; ctx.beginPath();
 
             let points = [];
             chartData.forEach((d, idx) => {
@@ -545,9 +545,9 @@
             ctx.stroke();
 
             points.forEach((p, idx) => {
-                ctx.beginPath(); ctx.arc(p.x, p.y, 4, 0, Math.PI * 2); ctx.fillStyle = '#34c759'; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#ffffff'; ctx.stroke();
+                ctx.beginPath(); ctx.arc(p.x, p.y, 4, 0, Math.PI * 2); ctx.fillStyle = '#ff4500'; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#ffffff'; ctx.stroke();
                 if(idx === 0 || idx === points.length - 1 || (points.length > 2 && idx === Math.floor(points.length / 2))) {
-                    ctx.fillStyle = '#aaaaaa'; ctx.textAlign = 'center'; ctx.fillText(p.date, p.x, canvas.height - 12);
+                    ctx.fillStyle = '#8e8e93'; ctx.textAlign = 'center'; ctx.fillText(p.date, p.x, canvas.height - 12);
                 }
             });
         }
